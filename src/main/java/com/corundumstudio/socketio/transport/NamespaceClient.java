@@ -1,24 +1,21 @@
 /**
  * Copyright 2012 Nikita Koksharov
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
  */
 package com.corundumstudio.socketio.transport;
 
 import java.net.SocketAddress;
 import java.util.Arrays;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.slf4j.Logger;
@@ -67,7 +64,7 @@ public class NamespaceClient implements SocketIOClient {
     }
 
     @Override
-    public void sendEvent(String name, Object ... data) {
+    public void sendEvent(String name, Object... data) {
         Packet packet = new Packet(PacketType.MESSAGE);
         packet.setSubType(PacketType.EVENT);
         packet.setName(name);
@@ -76,7 +73,7 @@ public class NamespaceClient implements SocketIOClient {
     }
 
     @Override
-    public void sendEvent(String name, AckCallback<?> ackCallback, Object ... data) {
+    public void sendEvent(String name, AckCallback<?> ackCallback, Object... data) {
         Packet packet = new Packet(PacketType.MESSAGE);
         packet.setSubType(PacketType.EVENT);
         packet.setName(name);
@@ -114,7 +111,8 @@ public class NamespaceClient implements SocketIOClient {
         baseClient.removeNamespaceClient(this);
         namespace.onDisconnect(this);
 
-        log.debug("Client {} for namespace {} has been disconnected", baseClient.getSessionId(), getNamespace().getName());
+        log.debug("Client {} for namespace {} has been disconnected", baseClient.getSessionId(),
+                        getNamespace().getName());
     }
 
     @Override
@@ -122,11 +120,11 @@ public class NamespaceClient implements SocketIOClient {
         Packet packet = new Packet(PacketType.MESSAGE);
         packet.setSubType(PacketType.DISCONNECT);
         send(packet);
-//        onDisconnect();
+        // onDisconnect();
     }
 
     @Override
-    public UUID getSessionId() {
+    public String getSessionId() {
         return baseClient.getSessionId();
     }
 
@@ -140,8 +138,8 @@ public class NamespaceClient implements SocketIOClient {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((getSessionId() == null) ? 0 : getSessionId().hashCode());
-        result = prime * result
-                + ((getNamespace().getName() == null) ? 0 : getNamespace().getName().hashCode());
+        result = prime * result + ((getNamespace().getName() == null) ? 0
+                        : getNamespace().getName().hashCode());
         return result;
     }
 

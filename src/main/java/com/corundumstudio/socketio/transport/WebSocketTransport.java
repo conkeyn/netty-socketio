@@ -1,17 +1,15 @@
 /**
  * Copyright 2012 Nikita Koksharov
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
  */
 package com.corundumstudio.socketio.transport;
 
@@ -65,9 +63,9 @@ public class WebSocketTransport extends ChannelInboundHandlerAdapter {
 
     private final boolean isSsl;
 
-    public WebSocketTransport(boolean isSsl,
-            AuthorizeHandler authorizeHandler, Configuration configuration,
-            CancelableScheduler scheduler, ClientsBox clientsBox) {
+    public WebSocketTransport(boolean isSsl, AuthorizeHandler authorizeHandler,
+                    Configuration configuration, CancelableScheduler scheduler,
+                    ClientsBox clientsBox) {
         this.isSsl = isSsl;
         this.authorizeHandler = authorizeHandler;
         this.configuration = configuration;
@@ -80,8 +78,7 @@ public class WebSocketTransport extends ChannelInboundHandlerAdapter {
         if (msg instanceof CloseWebSocketFrame) {
             ctx.channel().close();
             ReferenceCountUtil.release(msg);
-        } else if (msg instanceof BinaryWebSocketFrame
-                    || msg instanceof TextWebSocketFrame) {
+        } else if (msg instanceof BinaryWebSocketFrame || msg instanceof TextWebSocketFrame) {
             ByteBufHolder frame = (ByteBufHolder) msg;
             ClientHead client = clientsBox.get(ctx.channel());
             if (client == null) {
@@ -91,7 +88,8 @@ public class WebSocketTransport extends ChannelInboundHandlerAdapter {
                 return;
             }
 
-            ctx.pipeline().fireChannelRead(new PacketsMessage(client, frame.content(), Transport.WEBSOCKET));
+            ctx.pipeline().fireChannelRead(
+                            new PacketsMessage(client, frame.content(), Transport.WEBSOCKET));
             frame.release();
         } else if (msg instanceof FullHttpRequest) {
             FullHttpRequest req = (FullHttpRequest) msg;
@@ -103,12 +101,13 @@ public class WebSocketTransport extends ChannelInboundHandlerAdapter {
             if (transport != null && NAME.equals(transport.get(0))) {
                 try {
                     if (!configuration.getTransports().contains(Transport.WEBSOCKET)) {
-                        log.debug("{} transport not supported by configuration.", Transport.WEBSOCKET);
+                        log.debug("{} transport not supported by configuration.",
+                                        Transport.WEBSOCKET);
                         ctx.channel().close();
                         return;
                     }
                     if (sid != null && sid.get(0) != null) {
-                        final UUID sessionId = UUID.fromString(sid.get(0));
+                        final String sessionId = UUID.fromString(sid.get(0)).toString();
                         handshake(ctx, sessionId, path, req);
                     } else {
                         ClientHead client = ctx.channel().attr(ClientHead.CLIENT).get();
@@ -146,11 +145,13 @@ public class WebSocketTransport extends ChannelInboundHandlerAdapter {
         super.channelInactive(ctx);
     }
 
-    private void handshake(ChannelHandlerContext ctx, final UUID sessionId, String path, FullHttpRequest req) {
+    private void handshake(ChannelHandlerContext ctx, final String sessionId, String path,
+                    FullHttpRequest req) {
         final Channel channel = ctx.channel();
 
         WebSocketServerHandshakerFactory factory =
-                new WebSocketServerHandshakerFactory(getWebSocketLocation(req), null, true, configuration.getMaxFramePayloadLength());
+                        new WebSocketServerHandshakerFactory(getWebSocketLocation(req), null, true,
+                                        configuration.getMaxFramePayloadLength());
         WebSocketServerHandshaker handshaker = factory.newHandshaker(req);
         if (handshaker != null) {
             ChannelFuture f = handshaker.handshake(channel, req);
@@ -162,8 +163,10 @@ public class WebSocketTransport extends ChannelInboundHandlerAdapter {
                         return;
                     }
 
-                    channel.pipeline().addBefore(SocketIOChannelInitializer.WEB_SOCKET_TRANSPORT, SocketIOChannelInitializer.WEB_SOCKET_AGGREGATOR,
-                            new WebSocketFrameAggregator(configuration.getMaxFramePayloadLength()));
+                    channel.pipeline().addBefore(SocketIOChannelInitializer.WEB_SOCKET_TRANSPORT,
+                                    SocketIOChannelInitializer.WEB_SOCKET_AGGREGATOR,
+                                    new WebSocketFrameAggregator(
+                                                    configuration.getMaxFramePayloadLength()));
                     connectClient(channel, sessionId);
                 }
             });
@@ -172,11 +175,11 @@ public class WebSocketTransport extends ChannelInboundHandlerAdapter {
         }
     }
 
-    private void connectClient(final Channel channel, final UUID sessionId) {
+    private void connectClient(final Channel channel, final String sessionId) {
         ClientHead client = clientsBox.get(sessionId);
         if (client == null) {
             log.warn("Unauthorized client with sessionId: {} with ip: {}. Channel closed!",
-                        sessionId, channel.remoteAddress());
+                            sessionId, channel.remoteAddress());
             channel.close();
             return;
         }

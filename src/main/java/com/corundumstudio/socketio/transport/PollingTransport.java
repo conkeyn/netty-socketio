@@ -1,17 +1,15 @@
 /**
  * Copyright 2012 Nikita Koksharov
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
  */
 package com.corundumstudio.socketio.transport;
 
@@ -58,7 +56,8 @@ public class PollingTransport extends ChannelInboundHandlerAdapter {
     private final ClientsBox clientsBox;
     private final AuthorizeHandler authorizeHandler;
 
-    public PollingTransport(PacketDecoder decoder, AuthorizeHandler authorizeHandler, ClientsBox clientsBox) {
+    public PollingTransport(PacketDecoder decoder, AuthorizeHandler authorizeHandler,
+                    ClientsBox clientsBox) {
         this.decoder = decoder;
         this.authorizeHandler = authorizeHandler;
         this.clientsBox = clientsBox;
@@ -94,7 +93,7 @@ public class PollingTransport extends ChannelInboundHandlerAdapter {
 
                 try {
                     if (sid != null && sid.get(0) != null) {
-                        final UUID sessionId = UUID.fromString(sid.get(0));
+                        final String sessionId = UUID.fromString(sid.get(0)).toString();
                         handleMessage(req, sessionId, queryDecoder, ctx);
                     } else {
                         // first connection
@@ -110,26 +109,26 @@ public class PollingTransport extends ChannelInboundHandlerAdapter {
         ctx.fireChannelRead(msg);
     }
 
-    private void handleMessage(FullHttpRequest req, UUID sessionId, QueryStringDecoder queryDecoder, ChannelHandlerContext ctx)
-                                                                                throws IOException {
-            String origin = req.headers().get(HttpHeaderNames.ORIGIN);
-            if (queryDecoder.parameters().containsKey("disconnect")) {
-                ClientHead client = clientsBox.get(sessionId);
-                client.onChannelDisconnect();
-                ctx.channel().writeAndFlush(new XHRPostMessage(origin, sessionId));
-            } else if (HttpMethod.POST.equals(req.method())) {
-                onPost(sessionId, ctx, origin, req.content());
-            } else if (HttpMethod.GET.equals(req.method())) {
-                onGet(sessionId, ctx, origin);
-            } else if (HttpMethod.OPTIONS.equals(req.method())) {
-                onOptions(sessionId, ctx, origin);
-            } else {
-                log.error("Wrong {} method invocation for {}", req.method(), sessionId);
-                sendError(ctx);
-            }
+    private void handleMessage(FullHttpRequest req, String sessionId,
+                    QueryStringDecoder queryDecoder, ChannelHandlerContext ctx) throws IOException {
+        String origin = req.headers().get(HttpHeaderNames.ORIGIN);
+        if (queryDecoder.parameters().containsKey("disconnect")) {
+            ClientHead client = clientsBox.get(sessionId);
+            client.onChannelDisconnect();
+            ctx.channel().writeAndFlush(new XHRPostMessage(origin, sessionId));
+        } else if (HttpMethod.POST.equals(req.method())) {
+            onPost(sessionId, ctx, origin, req.content());
+        } else if (HttpMethod.GET.equals(req.method())) {
+            onGet(sessionId, ctx, origin);
+        } else if (HttpMethod.OPTIONS.equals(req.method())) {
+            onOptions(sessionId, ctx, origin);
+        } else {
+            log.error("Wrong {} method invocation for {}", req.method(), sessionId);
+            sendError(ctx);
+        }
     }
 
-    private void onOptions(UUID sessionId, ChannelHandlerContext ctx, String origin) {
+    private void onOptions(String sessionId, ChannelHandlerContext ctx, String origin) {
         ClientHead client = clientsBox.get(sessionId);
         if (client == null) {
             log.error("{} is not registered. Closing connection", sessionId);
@@ -140,8 +139,8 @@ public class PollingTransport extends ChannelInboundHandlerAdapter {
         ctx.channel().writeAndFlush(new XHROptionsMessage(origin, sessionId));
     }
 
-    private void onPost(UUID sessionId, ChannelHandlerContext ctx, String origin, ByteBuf content)
-                                                                                throws IOException {
+    private void onPost(String sessionId, ChannelHandlerContext ctx, String origin, ByteBuf content)
+                    throws IOException {
         ClientHead client = clientsBox.get(sessionId);
         if (client == null) {
             log.error("{} is not registered. Closing connection", sessionId);
@@ -162,7 +161,7 @@ public class PollingTransport extends ChannelInboundHandlerAdapter {
         ctx.pipeline().fireChannelRead(new PacketsMessage(client, content, Transport.POLLING));
     }
 
-    protected void onGet(UUID sessionId, ChannelHandlerContext ctx, String origin) {
+    protected void onGet(String sessionId, ChannelHandlerContext ctx, String origin) {
         ClientHead client = clientsBox.get(sessionId);
         if (client == null) {
             log.error("{} is not registered. Closing connection", sessionId);
@@ -176,7 +175,8 @@ public class PollingTransport extends ChannelInboundHandlerAdapter {
     }
 
     private void sendError(ChannelHandlerContext ctx) {
-        HttpResponse res = new DefaultHttpResponse(HTTP_1_1, HttpResponseStatus.INTERNAL_SERVER_ERROR);
+        HttpResponse res =
+                        new DefaultHttpResponse(HTTP_1_1, HttpResponseStatus.INTERNAL_SERVER_ERROR);
         ctx.channel().writeAndFlush(res).addListener(ChannelFutureListener.CLOSE);
     }
 

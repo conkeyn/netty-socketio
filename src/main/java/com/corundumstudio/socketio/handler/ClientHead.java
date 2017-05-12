@@ -1,17 +1,15 @@
 /**
  * Copyright 2012 Nikita Koksharov
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
  */
 package com.corundumstudio.socketio.handler;
 
@@ -21,7 +19,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -55,13 +52,16 @@ public class ClientHead {
 
     private static final Logger log = LoggerFactory.getLogger(ClientHead.class);
 
-    public static final AttributeKey<ClientHead> CLIENT = AttributeKey.<ClientHead>valueOf("client");
+    public static final AttributeKey<ClientHead> CLIENT =
+                    AttributeKey.<ClientHead>valueOf("client");
 
     private final AtomicBoolean disconnected = new AtomicBoolean();
-    private final Map<Namespace, NamespaceClient> namespaceClients = PlatformDependent.newConcurrentHashMap();
-    private final Map<Transport, TransportState> channels = new HashMap<Transport, TransportState>(2);
+    private final Map<Namespace, NamespaceClient> namespaceClients =
+                    PlatformDependent.newConcurrentHashMap();
+    private final Map<Transport, TransportState> channels =
+                    new HashMap<Transport, TransportState>(2);
     private final HandshakeData handshakeData;
-    private final UUID sessionId;
+    private final String sessionId;
 
     private final Store store;
     private final DisconnectableHub disconnectableHub;
@@ -75,9 +75,10 @@ public class ClientHead {
     // TODO use lazy set
     private volatile Transport currentTransport;
 
-    public ClientHead(UUID sessionId, AckManager ackManager, DisconnectableHub disconnectable,
-            StoreFactory storeFactory, HandshakeData handshakeData, ClientsBox clientsBox, Transport transport, CancelableScheduler disconnectScheduler,
-            Configuration configuration) {
+    public ClientHead(String sessionId, AckManager ackManager, DisconnectableHub disconnectable,
+                    StoreFactory storeFactory, HandshakeData handshakeData, ClientsBox clientsBox,
+                    Transport transport, CancelableScheduler disconnectScheduler,
+                    Configuration configuration) {
         this.sessionId = sessionId;
         this.ackManager = ackManager;
         this.disconnectableHub = disconnectable;
@@ -137,8 +138,8 @@ public class ClientHead {
         state.getPacketsQueue().add(packet);
 
         Channel channel = state.getChannel();
-        if (channel == null
-                || (transport == Transport.POLLING && channel.attr(EncoderHandler.WRITE_ONCE).get() != null)) {
+        if (channel == null || (transport == Transport.POLLING
+                        && channel.attr(EncoderHandler.WRITE_ONCE).get() != null)) {
             return null;
         }
         return sendPackets(transport, channel);
@@ -195,7 +196,7 @@ public class ClientHead {
         return ackManager;
     }
 
-    public UUID getSessionId() {
+    public String getSessionId() {
         return sessionId;
     }
 
@@ -212,8 +213,7 @@ public class ClientHead {
 
     public boolean isChannelOpen() {
         for (TransportState state : channels.values()) {
-            if (state.getChannel() != null
-                    && state.getChannel().isActive()) {
+            if (state.getChannel() != null && state.getChannel().isActive()) {
                 return true;
             }
         }
@@ -260,6 +260,7 @@ public class ClientHead {
     public void setLastBinaryPacket(Packet lastBinaryPacket) {
         this.lastBinaryPacket = lastBinaryPacket;
     }
+
     public Packet getLastBinaryPacket() {
         return lastBinaryPacket;
     }

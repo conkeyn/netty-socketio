@@ -1,26 +1,21 @@
 /**
  * Copyright 2012 Nikita Koksharov
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
  */
 package com.corundumstudio.socketio.ack;
-
-import io.netty.util.internal.PlatformDependent;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -37,6 +32,8 @@ import com.corundumstudio.socketio.protocol.Packet;
 import com.corundumstudio.socketio.scheduler.CancelableScheduler;
 import com.corundumstudio.socketio.scheduler.SchedulerKey;
 import com.corundumstudio.socketio.scheduler.SchedulerKey.Type;
+
+import io.netty.util.internal.PlatformDependent;
 
 public class AckManager implements Disconnectable {
 
@@ -71,7 +68,7 @@ public class AckManager implements Disconnectable {
 
     private static final Logger log = LoggerFactory.getLogger(AckManager.class);
 
-    private final Map<UUID, AckEntry> ackEntries = PlatformDependent.newConcurrentHashMap();
+    private final Map<String, AckEntry> ackEntries = PlatformDependent.newConcurrentHashMap();
 
     private final CancelableScheduler scheduler;
 
@@ -80,12 +77,12 @@ public class AckManager implements Disconnectable {
         this.scheduler = scheduler;
     }
 
-    public void initAckIndex(UUID sessionId, long index) {
+    public void initAckIndex(String sessionId, long index) {
         AckEntry ackEntry = getAckEntry(sessionId);
         ackEntry.initAckIndex(index);
     }
 
-    private AckEntry getAckEntry(UUID sessionId) {
+    private AckEntry getAckEntry(String sessionId) {
         AckEntry ackEntry = ackEntries.get(sessionId);
         if (ackEntry == null) {
             ackEntry = new AckEntry();
@@ -99,7 +96,8 @@ public class AckManager implements Disconnectable {
 
     @SuppressWarnings("unchecked")
     public void onAck(SocketIOClient client, Packet packet) {
-        AckSchedulerKey key = new AckSchedulerKey(Type.ACK_TIMEOUT, client.getSessionId(), packet.getAckId());
+        AckSchedulerKey key = new AckSchedulerKey(Type.ACK_TIMEOUT, client.getSessionId(),
+                        packet.getAckId());
         scheduler.cancel(key);
 
         AckCallback callback = removeCallback(client.getSessionId(), packet.getAckId());
@@ -116,13 +114,13 @@ public class AckManager implements Disconnectable {
             }
             if (args.size() > 1) {
                 log.error("Wrong ack args amount. Should be only one argument, but current amount is: {}. Ack id: {}, sessionId: {}",
-                        args.size(), packet.getAckId(), client.getSessionId());
+                                args.size(), packet.getAckId(), client.getSessionId());
             }
             callback.onSuccess(param);
         }
     }
 
-    private AckCallback<?> removeCallback(UUID sessionId, long index) {
+    private AckCallback<?> removeCallback(String sessionId, long index) {
         AckEntry ackEntry = ackEntries.get(sessionId);
         // may be null if client disconnected
         // before timeout occurs
@@ -132,12 +130,12 @@ public class AckManager implements Disconnectable {
         return null;
     }
 
-    public AckCallback<?> getCallback(UUID sessionId, long index) {
+    public AckCallback<?> getCallback(String sessionId, long index) {
         AckEntry ackEntry = getAckEntry(sessionId);
         return ackEntry.getAckCallback(index);
     }
 
-    public long registerAck(UUID sessionId, AckCallback<?> callback) {
+    public long registerAck(String sessionId, AckCallback<?> callback) {
         AckEntry ackEntry = getAckEntry(sessionId);
         ackEntry.initAckIndex(0);
         long index = ackEntry.addAckCallback(callback);
@@ -151,7 +149,8 @@ public class AckManager implements Disconnectable {
         return index;
     }
 
-    private void scheduleTimeout(final long index, final UUID sessionId, AckCallback<?> callback) {
+    private void scheduleTimeout(final long index, final String sessionId,
+                    AckCallback<?> callback) {
         if (callback.getTimeout() == -1) {
             return;
         }
