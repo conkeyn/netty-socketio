@@ -44,12 +44,12 @@
 			<id>SoundBus-Releases</id>
 			<!-- <id>标签中的值需要与settings.xml中的<server>标签中的<id>标签值一致才可以 -->
 			<name>SoundBus-Releases</name>
-			<url>http://mvnrepository.soundbus.tech/nexus/content/repositories/releases/</url>
+			<url>http://27.154.225.34:8087/nexus/content/repositories/releases/</url>
 		</repository>
 		<snapshotRepository>
 			<id>SoundBus-Snapshots</id>
 			<name>SoundBus-Snapshots</name>
-			<url>http://mvnrepository.soundbus.tech/nexus/content/repositories/snapshots/</url>
+			<url>http://27.154.225.34:8087/nexus/content/repositories/snapshots/</url>
 		</snapshotRepository>
 	</distributionManagement>
 
@@ -111,13 +111,13 @@
 		<dependency>
 			<groupId>org.jmockit</groupId>
 			<artifactId>jmockit</artifactId>
-			<version>1.12</version>
+			<version>1.35</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>4.11</version>
+			<version>4.12</version>
 			<scope>test</scope>
 		</dependency>
 
@@ -141,13 +141,13 @@
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-beans</artifactId>
-			<version>[2.5,)</version>
+			<version>[4.3.5.RELEASE,5.0.0.M1)</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-core</artifactId>
-			<version>[2.5,)</version>
+			<version>[4.3.5.RELEASE,5.0.0.M1)</version>
 			<exclusions>
 				<exclusion>
 					<groupId>commons-logging</groupId>
